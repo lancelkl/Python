@@ -1,0 +1,32 @@
+# split large file to small size which Excel can handle
+
+ThicknessFileName = input("Input file name, with .txt please! (enter for ThicknessTan-CC-only.txt) : " )
+if ThicknessFileName == '':
+    ThicknessFileName = "ThicknessTan-CC-only.txt"
+MinusLabel = "-"
+TXTposition = ThicknessFileName.find('.txt')
+k = 2
+# print(TXTposition)
+
+ThicknessSaveFileName = ThicknessFileName[0:TXTposition] + MinusLabel + str(k) + ThicknessFileName[TXTposition:TXTposition+4]
+# print(ThicknessSaveFileName)
+fileR = open(ThicknessFileName,"r")
+fileW = open(ThicknessSaveFileName,"w")
+i = 1
+while True:
+    a = fileR.readline()
+    if a == '':
+        break
+    b = a.find('no.')
+    i = i + 1
+    if i >= 1046500 and b >0:
+        fileW.close()
+        print(ThicknessSaveFileName, "saved!")
+        k = k + 1
+        ThicknessSaveFileName = ThicknessFileName[0:TXTposition] + MinusLabel + str(k) + ThicknessFileName[TXTposition:TXTposition+4]
+        #print(ThicknessSaveFileName)
+        fileW = open(ThicknessSaveFileName,"w")
+        i = 1
+    fileW.writelines(a)
+fileR.close()
+fileW.close()
