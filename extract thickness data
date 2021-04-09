@@ -1,0 +1,39 @@
+# used for extract CC thickness data from TXT file
+
+ThicknessFileName = input("Input file name, with .txt please! (enter for ThicknessTan.txt): " )
+if ThicknessFileName == '':
+    ThicknessFileName = "ThicknessTan.txt"
+MinusLabel = "-"
+
+# print(TXTposition)
+TXTposition = ThicknessFileName.find('.txt')
+diskcount = 0
+
+ThicknessSaveFileName = ThicknessFileName[0:TXTposition] + MinusLabel + "CC-only" + ThicknessFileName[TXTposition:TXTposition+4]
+# print(ThicknessSaveFileName)
+
+fileR = open(ThicknessFileName,"r")
+fileW = open(ThicknessSaveFileName,"w")
+while True:
+    a = fileR.readline()
+    if a == '':
+        break
+    b1 = a.find('no.')
+    b2 = a.find('Cover')
+    if b1 >= 0:
+        fileW.writelines(a)
+        b1 = -1
+        b2 = -1
+    if b2 >= 0 and b1 == -1:
+        diskcount = diskcount+1
+        if (diskcount % 1000) == 0:
+            print("disc",diskcount,"pcs saved!")
+        fileW.writelines(a)
+        a = fileR.readline()
+        c = len(a)
+        while c > 10:
+            fileW.writelines(a)
+            a = fileR.readline()
+            c = len(a)            
+fileR.close()
+fileW.close()
