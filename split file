@@ -1,4 +1,4 @@
-# split large file to small size which Excel can handle
+# split large file to smaller size which Excel can handle
 
 ThicknessFileName = input("Input file name, with .txt please! (enter for ThicknessTan-CC-only.txt) : " )
 if ThicknessFileName == '':
