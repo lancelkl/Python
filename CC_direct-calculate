@@ -64,10 +64,17 @@ while True:
                         counter = counter + 1
                 counter = 0
                 input_line_len1 = float(len(input_line))
-                #print(input_line_len1) for debug
-                #print(char_location)   for debug
+                #print(input_line_len1) #for debug
+                #print(char_location)   #for debug
             if j != 7:
-                radius[j] = radius[j] + float(input_line[char_location[j]+1:char_location[j+1]])
+                #2021/06/30 added #for thickness < 10um
+                if input_line[char_location[j]+1:char_location[j+1]].find(';') > -1:
+                    for k in range(len(input_line)):
+                        if input_line[k] == ";":
+                            char_location[counter] = k
+                            counter = counter + 1
+                    counter = 0
+                radius[j] = radius[j] + float(input_line[char_location[j]+1:char_location[j+1]])                
                 if float(input_line[char_location[j]+1:char_location[j+1]]) < radius_min[j]:
                     radius_min[j] = float(input_line[char_location[j]+1:char_location[j+1]])
                 if float(input_line[char_location[j]+1:char_location[j+1]]) > radius_max[j]:
