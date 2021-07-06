@@ -1,0 +1,155 @@
+#ThicknessFileName = input("Input file name, with .txt please! (enter for ThicknessTan.txt): " )
+#if ThicknessFileName == '':
+print("Extracting cover coating thickness...")
+ThicknessFileName = "ThicknessTan.txt"
+MinusLabel = "-"
+TXTposition = ThicknessFileName.find('.txt')
+#print(TXTposition)
+diskcount = 0
+
+ThicknessSaveFileName = ThicknessFileName[0:TXTposition] + MinusLabel + "CC-only" + ThicknessFileName[TXTposition:TXTposition+4]
+#print(ThicknessSaveFileName)
+fileR = open(ThicknessFileName,"r")
+fileW = open(ThicknessSaveFileName,"w")
+while True:
+    a = fileR.readline()
+    if a == '':
+        break
+    b1 = a.find('no.')
+    b2 = a.find('Cover')
+    if b1 >= 0:
+        fileW.writelines(a)
+        b1 = -1
+        b2 = -1
+    if b2 >= 0 and b1 == -1:
+        diskcount = diskcount+1
+        if (diskcount % 1000) == 0:
+            print("disc",diskcount,"pcs saved!")
+        fileW.writelines(a)
+        a = fileR.readline()
+        c = len(a)
+        while c > 10:
+            fileW.writelines(a)
+            a = fileR.readline()
+            c = len(a)            
+fileR.close()
+fileW.close()
+print("part-1 ",diskcount," finished!!")
+print()
+print("Calculate average/max./min. of thickness...")
+#ThicknessFileName = input("Input file name, with .txt please! (enter for ThicknessTan-CC-only.txt) : " )
+#if ThicknessFileName == '':
+ThicknessFileName = "ThicknessTan-CC-only.txt"
+ThicknessSaveFileName = "x1-20210000-QC3-Thickness.txt"
+#print(ThicknessSaveFileName)
+fileR = open(ThicknessFileName,"r")
+fileW = open(ThicknessSaveFileName,"w")
+i = 0
+disc_saved = 0
+reference_value = 0
+
+import array as array1
+char_location = array1.array('I', [0,0,0,0,0,0,0,0])
+counter = 0
+input_line_len1 = -1
+
+radius_label = ['r23.5;','r28.0;','r33.0;','r38.0;','r43.0;','r48.0;','r53.0;','r57.5;']
+
+R235,R280,R330,R380,R430,R480,R530,R575 = (0,0,0,0,0,0,0,0)
+radius = [R235,R280,R330,R380,R430,R480,R530,R575]
+
+R235_min,R280_min,R330_min,R380_min,R430_min,R480_min,R530_min,R575_min = (99,99,99,99,99,99,99,99)
+radius_min = [R235_min,R280_min,R330_min,R380_min,R430_min,R480_min,R530_min,R575_min]
+
+R235_max,R280_max,R330_max,R380_max,R430_max,R480_max,R530_max,R575_max = (-1,-1,-1,-1,-1,-1,-1,-1)
+radius_max = [R235_max,R280_max,R330_max,R380_max,R430_max,R480_max,R530_max,R575_max]                
+
+while True:
+    input_line = fileR.readline()
+    if input_line=='':
+        reference_value = (radius[0] / i)
+        
+        for j in range(len(radius)):
+            part_ave = str(round(radius[j] / i,2)) + ";"
+            part_min = str(round(radius_min[j],2)) + ";"
+            part_max = str(round(radius_max[j],2)) + ";"
+            part_ref_min = str(round((radius_min[j] - reference_value),2)) + ";"
+            part_ref_max = str(round((radius_max[j] - reference_value),2))
+            part_delta = str(round((radius_max[j] - radius_min[j]),2)) + ";"
+            fileW.writelines(radius_label[j] + part_ave + part_min + part_max + part_delta + part_ref_min + part_ref_max + "\n")
+        disc_ave = str(round((sum(radius) / (float(len(radius))*i)),2)) + ";"
+        disc_min = str(min(radius_min)) + ";"
+        disc_max = str(max(radius_max))
+        fileW.writelines("Total;" + disc_ave + disc_min + disc_max + "\n")            
+        break
+
+    text_checker_o = input_line.find('o')
+    if text_checker_o > 0 and i == 0:
+        fileW.writelines(input_line)
+
+    text_checker_backslash = input_line.find('/')
+    if text_checker_o < 0 and text_checker_backslash > 0:
+        fileW.writelines("Radius;ave;min;max;delta;ref_min;ref_max" + "\n")
+
+    if text_checker_o < 0 and text_checker_backslash < 0:
+        i = i + 1
+
+        for j in range(len(radius)):
+            if input_line_len1 - float(len(input_line)) !=0:
+                for k in range(len(input_line)):
+                    if input_line[k] == ";":
+                        char_location[counter] = k
+                        counter = counter + 1
+                counter = 0
+                input_line_len1 = float(len(input_line))
+                #print(input_line_len1) #for debug
+                #print(char_location)   #for debug
+            if j != 7:
+                #2021/06/30 added #for thickness < 10um
+                if input_line[char_location[j]+1:char_location[j+1]].find(';') > -1:
+                    for k in range(len(input_line)):
+                        if input_line[k] == ";":
+                            char_location[counter] = k
+                            counter = counter + 1
+                    counter = 0
+                radius[j] = radius[j] + float(input_line[char_location[j]+1:char_location[j+1]])                
+                if float(input_line[char_location[j]+1:char_location[j+1]]) < radius_min[j]:
+                    radius_min[j] = float(input_line[char_location[j]+1:char_location[j+1]])
+                if float(input_line[char_location[j]+1:char_location[j+1]]) > radius_max[j]:
+                    radius_max[j] = float(input_line[char_location[j]+1:char_location[j+1]])
+            if j == 7:
+                radius[j] = radius[j] + float(input_line[char_location[j]+1:])
+                if float(input_line[char_location[j]+1:]) < radius_min[j]:
+                    radius_min[j] = float(input_line[char_location[j]+1:])
+                if float(input_line[char_location[j]+1:]) > radius_max[j]:
+                    radius_max[j] = float(input_line[char_location[j]+1:])
+
+    if i > 0 and input_line.find('TL') > 0:
+        reference_value = (radius[0] / i)        
+        for j in range(len(radius)):
+            part_ave = str(round(radius[j] / i,2)) + ";"
+            part_min = str(round(radius_min[j],2)) + ";"
+            part_max = str(round(radius_max[j],2)) + ";"
+            part_ref_min = str(round((radius_min[j] - reference_value),2)) + ";"
+            part_ref_max = str(round((radius_max[j] - reference_value),2))
+            part_delta = str(round((radius_max[j] - radius_min[j]),2)) + ";"
+            fileW.writelines(radius_label[j] + part_ave + part_min + part_max + part_delta + part_ref_min + part_ref_max + "\n")
+        disc_ave = str(round((sum(radius) / (float(len(radius))*i)),2)) + ";"
+        disc_min = str(min(radius_min)) + ";"
+        disc_max = str(max(radius_max))
+        fileW.writelines("Total;" + disc_ave + disc_min + disc_max + "\n")
+        disc_saved = disc_saved + 1
+        if (disc_saved % 1000) == 0:
+            print("disc",disc_saved,"pcs saved!")
+        fileW.writelines(input_line)
+        i = 0
+        for j in range(len(radius)):
+            radius[j] = 0
+            radius_min[j] = 99
+            radius_max[j] = -1
+
+fileR.close()
+fileW.close()
+print("part-2 ",disc_saved," finished!!")
+import time
+time.sleep(1)
